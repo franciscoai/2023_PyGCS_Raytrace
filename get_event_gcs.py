@@ -114,7 +114,6 @@ def do_gcs(input_data: Tuple[List[str], List[str]], savepath: str, event_id: int
     satpos, plotranges = pyGCS.processHeaders(headers)
     clouds = pyGCS.getGCS(0, 30., 50., 12., 0.3, 30, satpos, nleg=5, ncirc=20, ncross=40)
 
-
     # Missing How to save output into some kind of file
     # or what else to do here.
 
@@ -227,6 +226,6 @@ if __name__ == '__main__':
     event_end_time = parse_time(input("\nEnter start-time (YYYY-MM-DD hh:mm:ss format):\n"))
     event_number = int(input("\nEnter event number\n"))  # ask this
 
-    run_event_gcs(start_time=event_start_time, end_time=event_end_time, cadence=2, do_with_lasco_cor=True, event_id=event_number)
+    run_event_gcs(start_time=event_start_time, end_time=event_end_time, cadence=2, do_low_corona=True, event_id=event_number)
 
 
