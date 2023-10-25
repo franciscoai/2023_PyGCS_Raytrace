@@ -33,21 +33,21 @@ def run_event_gcs(start_time: Time, end_time: Time, event_id: int, cadence: int 
     # Later we'll fix this checking start and end time
 
     event_date = start_time.to_value(format='iso', subfmt='date')
-    event_date = event_date.replace('-', '')
+    #event_date = event_date.replace('-', '')
 
     event_save_path = SAVE_PATH + event_date + '/'
-    event_lasco_path = LASCO_PATH + event_date + '/c2/'
-    event_aia_path = AIA193_PATH + event_date + '/preped/'
-    event_euvia_path = EUVI195_A_PATH + event_date + '/preped/'
-    event_euvib_path = EUVI195_B_PATH + event_date + '/preped/'
-    event_cor2a_path = COR2A_PATH + event_date + '/preped/'
-    event_cor2b_path = COR2B_PATH + event_date + '/preped/'
+    event_lasco_path = LASCO_PATH + event_date + '/'
+    event_aia_path = AIA193_PATH + event_date + '/'
+    event_euvia_path = EUVI195_A_PATH + event_date + '/'
+    event_euvib_path = EUVI195_B_PATH + event_date + '/'
+    event_cor2a_path = COR2A_PATH + event_date + '/'
+    event_cor2b_path = COR2B_PATH + event_date + '/'
 
     # Select files needed from files in folder
-    lasco_files = event_file_select(files=(event_lasco_path + '*.fts'), start_time=start_time, end_time=end_time)
-    aia_files = event_file_select(files=glob(event_aia_path + '*.fits'), start_time=start_time, end_time=end_time)
-    euvia_files = event_file_select(files=glob(event_euvia_path + '*fts'), start_time=start_time, end_time=end_time)
-    euvib_files = event_file_select(files=glob(event_euvib_path + '*fts'), start_time=start_time, end_time=end_time)
+    lasco_files = event_file_select(files=glob(event_lasco_path + '*.fts'), start_time=start_time, end_time=end_time)
+    #aia_files = event_file_select(files=glob(event_aia_path + '*.fits'), start_time=start_time, end_time=end_time)
+    #euvia_files = event_file_select(files=glob(event_euvia_path + '*fts'), start_time=start_time, end_time=end_time)
+    #euvib_files = event_file_select(files=glob(event_euvib_path + '*fts'), start_time=start_time, end_time=end_time)
     cor2a_files = event_file_select(files=glob(event_cor2a_path + '*fts'), start_time=start_time, end_time=end_time)
     cor2b_files = event_file_select(files=glob(event_cor2b_path + '*fts'), start_time=start_time, end_time=end_time)
 
@@ -190,14 +190,7 @@ def match_time_with_image(time_instant: Time, images_files: List, time_tolerance
     return closest_one
 
 
-def get_time_from_file(filename: str) -> Time:
 
-    hdr = fits.getheader(filename)
-
-    if "lasco" in filename:
-        return parse_time(hdr["DATE-OBS"] + " " + hdr['TIME-OBS'])
-    else:
-        return parse_time(hdr["DATE-OBS"])
 
 
 def event_file_select(files: List[str], start_time: Time, end_time: Time) -> List[str]:
@@ -209,12 +202,7 @@ def event_file_select(files: List[str], start_time: Time, end_time: Time) -> Lis
         start_time:
         end_time:
     """
-
-    fits_files = [fits.open(file) for file in files]
-
-    # This may work on newer fits files but on some lasco files it will have to be DATE-OBS + TIME-OBS
-    # haven´t tested it yet but should be working
-    fits_date_obs = [parse_time(fits_file[0].header['DATE-OBS']) for fits_file in fits_files]
+    fits_date_obs = sorted([get_time_from_file(fits_file) for fits_file in files])
 
     start_index = 0
     end_index = 0
@@ -233,6 +221,15 @@ def event_file_select(files: List[str], start_time: Time, end_time: Time) -> Lis
         print("Error while figuring out start/end indexes")
 
     return selected_files
+
+def get_time_from_file(filename: str) -> Time:
+
+    hdr = fits.getheader(filename)
+
+    if "lasco" in filename:
+        return parse_time(hdr["DATE-OBS"] + " " + hdr['TIME-OBS'])
+    else:
+        return parse_time(hdr["DATE-OBS"])
 
 
 if __name__ == '__main__':
