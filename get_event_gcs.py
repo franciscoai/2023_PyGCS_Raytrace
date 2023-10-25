@@ -142,25 +142,23 @@ def data_sort(view1_files: List[str], view2_files: List[str], view3_files: List[
                   [aia_dataN, euvia_dataN, euvib_dataN] ]
     """
 
-    event_duration = start_time - end_time
+    event_duration = end_time - start_time
 
-    # Define max tolerance for nearest image in time with cadence
-    if cadence <= 6:
-        delta_t = TimeDelta(GCS_DELTA_T)
-    else:
-        delta_t = TimeDelta(1 * apu.h) / cadence
+    time_tolerance = TimeDelta(GCS_DELTA_T)
+
+    delta_t = TimeDelta(1 * apu.h) / cadence
 
     # Define list of time instants to match images times
     instants_number = int(event_duration.sec / delta_t.sec)
     time_instants = start_time + delta_t * np.arange(0, instants_number)
 
     # Match time with images
-    view1_matched_fits = [match_time_with_image(time, view1_files, delta_t) for time in time_instants]
-    view2_matched_fits = [match_time_with_image(time, view2_files, delta_t) for time in time_instants]
-    view3_matched_fits = [match_time_with_image(time, view3_files, delta_t) for time in time_instants]
+    view1_matched_fits = [match_time_with_image(time, view1_files, time_tolerance) for time in time_instants]
+    view2_matched_fits = [match_time_with_image(time, view2_files, time_tolerance) for time in time_instants]
+    view3_matched_fits = [match_time_with_image(time, view3_files, time_tolerance) for time in time_instants]
 
     # return zipped view1, view2, view3 files
-    return zip(view1_matched_fits, view2_matched_fits, view3_matched_fits)
+    return list(zip(view1_matched_fits, view2_matched_fits, view3_matched_fits))
 
 
 def match_time_with_image(time_instant: Time, images_files: List, time_tolerance: TimeDelta) -> str:
@@ -168,20 +166,38 @@ def match_time_with_image(time_instant: Time, images_files: List, time_tolerance
     """
         match_time_with_image:
             This function takes a Time object and a list of open fits files, and looks for the closest in time fits,
-            taking into account of course the time tolerance
+            taking into account max time tolerance
     """
 
     matched_files = []
     time_distances = []
+
     for file in images_files:
-        hdr = fits.getheader(file)
-        time_distance = parse_time(hdr["DATE_OBS"]) - time_instant
+        file_time = get_time_from_file(file)
+        time_instant2 = time_instant
+        time_distance = abs(file_time - time_instant2)
+
         if time_distance.sec <= time_tolerance.sec:
             matched_files.append(file)
             time_distances.append(time_distance)
 
     # Return the closest one
-    return matched_files[time_distances.index(min(time_distances))]
+    try:
+        closest_one = matched_files[time_distances.index(min(time_distances))]
+    except ValueError:
+        closest_one = ""
+
+    return closest_one
+
+
+def get_time_from_file(filename: str) -> Time:
+
+    hdr = fits.getheader(filename)
+
+    if "lasco" in filename:
+        return parse_time(hdr["DATE-OBS"] + " " + hdr['TIME-OBS'])
+    else:
+        return parse_time(hdr["DATE-OBS"])
 
 
 def event_file_select(files: List[str], start_time: Time, end_time: Time) -> List[str]:
