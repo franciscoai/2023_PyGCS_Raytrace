@@ -1,7 +1,7 @@
 import astropy.units as apu
 
 DATA_PATH = '/gehme/data'
-SECCHI_PATH = DATA_PATH + '/stereo/secchi/L0'
+SECCHI_PATH = DATA_PATH + '/stereo/secchi/L1'
 
 LASCO_PATH = DATA_PATH + '/soho/lasco/level_1/c2/'
 AIA193_PATH = DATA_PATH + '/sdo/aia/l1/193/'

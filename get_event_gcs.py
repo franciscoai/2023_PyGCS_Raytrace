@@ -33,7 +33,7 @@ def run_event_gcs(start_time: Time, end_time: Time, event_id: int, cadence: int 
     # Later we'll fix this checking start and end time
 
     event_date = start_time.to_value(format='iso', subfmt='date')
-    #event_date = event_date.replace('-', '')
+    event_date = event_date.replace('-', '')
 
     event_save_path = SAVE_PATH + event_date + '/'
     event_lasco_path = LASCO_PATH + event_date + '/'
@@ -45,9 +45,9 @@ def run_event_gcs(start_time: Time, end_time: Time, event_id: int, cadence: int 
 
     # Select files needed from files in folder
     lasco_files = event_file_select(files=glob(event_lasco_path + '*.fts'), start_time=start_time, end_time=end_time)
-    #aia_files = event_file_select(files=glob(event_aia_path + '*.fits'), start_time=start_time, end_time=end_time)
-    #euvia_files = event_file_select(files=glob(event_euvia_path + '*fts'), start_time=start_time, end_time=end_time)
-    #euvib_files = event_file_select(files=glob(event_euvib_path + '*fts'), start_time=start_time, end_time=end_time)
+    aia_files = event_file_select(files=glob(event_aia_path + '*.fits'), start_time=start_time, end_time=end_time)
+    euvia_files = event_file_select(files=glob(event_euvia_path + '*fts'), start_time=start_time, end_time=end_time)
+    euvib_files = event_file_select(files=glob(event_euvib_path + '*fts'), start_time=start_time, end_time=end_time)
     cor2a_files = event_file_select(files=glob(event_cor2a_path + '*fts'), start_time=start_time, end_time=end_time)
     cor2b_files = event_file_select(files=glob(event_cor2b_path + '*fts'), start_time=start_time, end_time=end_time)
 
@@ -82,6 +82,9 @@ def do_gcs(input_data: Tuple[List[str], List[str]], savepath: str, event_id: int
     save_file = savepath + f'event_{event_id}.sav'  # check this on python i.e. how to save this data.
 
     snapshot_0, snapshot_1 = input_data
+
+    if "" in snapshot_0 or "" in snapshot_1:
+        return "Missing one or more images to do the gcs", None, None, None, None
 
     # Read in fits files
     fnameA0, fnameB0, fnameL0 = snapshot_0
@@ -190,9 +193,6 @@ def match_time_with_image(time_instant: Time, images_files: List, time_tolerance
     return closest_one
 
 
-
-
-
 def event_file_select(files: List[str], start_time: Time, end_time: Time) -> List[str]:
 
     """
@@ -222,6 +222,7 @@ def event_file_select(files: List[str], start_time: Time, end_time: Time) -> Lis
 
     return selected_files
 
+
 def get_time_from_file(filename: str) -> Time:
 
     hdr = fits.getheader(filename)
@@ -239,6 +240,5 @@ if __name__ == '__main__':
     event_end_time = parse_time(input("\nEnter start-time (YYYY-MM-DD hh:mm:ss format):\n"))
     event_number = int(input("\nEnter event number\n"))  # ask this
 
-    run_event_gcs(start_time=event_start_time, end_time=event_end_time, cadence=2, do_low_corona=True, event_id=event_number)
-
-
+    run_event_gcs(start_time=event_start_time, end_time=event_end_time, cadence=2, do_low_corona=True,
+                  event_id=event_number)
