@@ -124,7 +124,7 @@ class Ui_MainWindow(object):
         self.saveLabel = QtWidgets.QLabel(self.centralwidget)
         self.saveLabel.setGeometry(QtCore.QRect(30, 520, 113, 32))
 
-        # Button for turining the wireframe on or off -----------------------------------|
+        # Button for turning the wireframe on or off -----------------------------------|
         self.wireButton = QtWidgets.QPushButton(self.centralwidget)
         self.wireButton.setGeometry(QtCore.QRect(30, 440, 131, 32))
 
@@ -445,49 +445,49 @@ class mywindow(QtWidgets.QMainWindow):
         for line in data:
             if (line[0] == 'Lon:'):
                 self.ui.leLon.setText(str(line[1]))
-                self.ui.sliderLon.setValue(line[1])
+                self.ui.sliderLon.setValue(int(line[1]))
             if (line[0] == 'Lat:'):
                 self.ui.leLat.setText(str(line[1]))
-                self.ui.sliderLat.setValue(line[1])
+                self.ui.sliderLat.setValue(int(line[1]))
             if (line[0] == 'Tilt:'):
                 self.ui.leTilt.setText(str(line[1]))
-                self.ui.sliderTilt.setValue(line[1])
+                self.ui.sliderTilt.setValue(int(line[1]))
             if (line[0] == 'Height:'):
                 self.ui.leHeight.setText(str(line[1]))
-                self.ui.sliderHeight.setValue(10*line[1])
+                self.ui.sliderHeight.setValue(int(10*line[1]))
             if (line[0] == 'HalfAng:'):
                 self.ui.leAW.setText(str(line[1]))
-                self.ui.sliderAW.setValue(line[1])
+                self.ui.sliderAW.setValue(int(line[1]))
             if (line[0] == 'Ratio:'):
                 self.ui.leK.setText(str(line[1]))
-                self.ui.sliderK.setValue(100*line[1])
+                self.ui.sliderK.setValue(int(100*line[1]))
             if (line[0] == 'Scaling:'):
                 revScDict = {0: 'Linear', 1: 'Log', 2: 'Sqrt'}
                 self.ui.menuScale.setCurrentText(revScDict[int(line[1])])
                 self.selectionchange()
             if (line[0] == 'Sat1min:'):
                 self.ui.leSat1low.setText(str(line[1]))
-                self.ui.slSat1low.setValue(line[1])
+                self.ui.slSat1low.setValue(int(line[1]))
                 minmaxesOut[0][0] = line[1]
             if (line[0] == 'Sat1max:'):
                 self.ui.leSat1hi.setText(str(line[1]))
-                self.ui.slSat1hi.setValue(line[1])
+                self.ui.slSat1hi.setValue(int(line[1]))
                 minmaxesOut[0][1] = line[1]
             if (line[0] == 'Sat2min:') & (nSats > 1):
                 self.ui.leSat2low.setText(str(line[1]))
-                self.ui.slSat2low.setValue(line[1])
+                self.ui.slSat2low.setValue(int(line[1]))
                 minmaxesOut[1][0] = line[1]
             if (line[0] == 'Sat2max:') & (nSats > 1):
                 self.ui.leSat2hi.setText(str(line[1]))
-                self.ui.slSat2hi.setValue(line[1])
+                self.ui.slSat2hi.setValue(int(line[1]))
                 minmaxesOut[1][1] = line[1]
             if (line[0] == 'Sat3min:') & (nSats == 3):
                 self.ui.leSat3low.setText(str(line[1]))
-                self.ui.slSat3low.setValue(line[1])
+                self.ui.slSat3low.setValue(int(line[1]))
                 minmaxesOut[2][0] = line[1]
             if (line[0] == 'Sat3max:') & (nSats == 3):
                 self.ui.leSat3hi.setText(str(line[1]))
-                self.ui.slSat3hi.setValue(line[1])
+                self.ui.slSat3hi.setValue(int(line[1]))
                 minmaxesOut[2][1] = line[1]
         return minmaxesOut
 
@@ -556,12 +556,12 @@ class mywindow(QtWidgets.QMainWindow):
             sls = [self.ui.slSat3low, self.ui.slSat3hi]
             les = [self.ui.leSat3low, self.ui.leSat3hi]
         # Reset things
-        sls[0].setMinimum(slLow)
-        sls[0].setMaximum(slHigh)
-        sls[1].setMinimum(slLow)
-        sls[1].setMaximum(slHigh)
-        sls[0].setValue(Bmin)
-        sls[1].setValue(Bmax)
+        sls[0].setMinimum(int(slLow))
+        sls[0].setMaximum(int(slHigh))
+        sls[1].setMinimum(int(slLow))
+        sls[1].setMaximum(int(slHigh))
+        sls[0].setValue(int(Bmin))
+        sls[1].setValue(int(Bmax))
         les[0].setText(str(int(Bmin)))
         les[1].setText(str(int(Bmax)))
         return Bmin, Bmax
@@ -729,12 +729,12 @@ class mywindow(QtWidgets.QMainWindow):
         minmaxes[2][0] = float(self.ui.leSat3low.text())
         minmaxes[2][1] = float(self.ui.leSat3hi.text())
         # Update brighteness sliders
-        self.ui.slSat1low.setValue(minmaxes[0][0])
-        self.ui.slSat1hi.setValue(minmaxes[0][1])
-        self.ui.slSat2low.setValue(minmaxes[1][0])
-        self.ui.slSat2hi.setValue(minmaxes[1][1])
-        self.ui.slSat3low.setValue(minmaxes[2][0])
-        self.ui.slSat3hi.setValue(minmaxes[2][1])
+        self.ui.slSat1low.setValue(int(minmaxes[0][0]))
+        self.ui.slSat1hi.setValue(int(minmaxes[0][1]))
+        self.ui.slSat2low.setValue(int(minmaxes[1][0]))
+        self.ui.slSat2hi.setValue(int(minmaxes[1][1]))
+        self.ui.slSat3low.setValue(int(minmaxes[2][0]))
+        self.ui.slSat3hi.setValue(int(minmaxes[2][1]))
         # Update images
         images[0].updateImage(image=imgOut[0], levels=minmaxes[0])
         images[1].updateImage(image=imgOut[1], levels=minmaxes[1])
@@ -749,11 +749,11 @@ class mywindow(QtWidgets.QMainWindow):
         ang = float(self.ui.leAW.text())
         k = float(self.ui.leK.text())
         # Reset Sliders
-        self.ui.sliderLon.setValue(CMElon)
-        self.ui.sliderLat.setValue(CMElat)
-        self.ui.sliderTilt.setValue(CMEtilt)
+        self.ui.sliderLon.setValue(int(CMElon))
+        self.ui.sliderLat.setValue(int(CMElat))
+        self.ui.sliderTilt.setValue(int(CMEtilt))
         self.ui.sliderHeight.setValue(int(height*10))
-        self.ui.sliderAW.setValue(ang)
+        self.ui.sliderAW.setValue(int(ang))
         self.ui.sliderK.setValue(int(k*100))
         # Make new wirerframes and plot
         data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
