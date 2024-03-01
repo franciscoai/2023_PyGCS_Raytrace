@@ -10,13 +10,20 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 from pyGCS import *
 
+"""
+TODO:
+- Add a way to save the current state of the GUI using right click or a botton. replace close event for this.
+-Add more important information such as filenames and date of the images in the txt file. check that doesnt affect the reading.
+- Add a botton to run raytrace, show and save the synthetic images
+"""
+
 global nSats
 global CMElat, CMElon, CMEtilt, height, k, ang, satpos
 global fname
 
 # This will output the values to this filename so it can reload
 # after it has been closed.  Delete this file to open with defaults
-fname = 'GCSvals.txt'
+#fname = 'GCSvals.txt'
 
 
 class Ui_MainWindow(object):
@@ -87,7 +94,7 @@ class Ui_MainWindow(object):
         self.sliderHeight.setGeometry(QtCore.QRect(30, 270, 160, 22))
         self.sliderHeight.setOrientation(QtCore.Qt.Horizontal)
         self.sliderHeight.setMinimum(11)
-        self.sliderHeight.setMaximum(250)
+        self.sliderHeight.setMaximum(300)
         self.sliderHeight.setValue(50)
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         self.label_4.setGeometry(QtCore.QRect(30, 230, 71, 16))
@@ -128,6 +135,10 @@ class Ui_MainWindow(object):
         self.wireButton = QtWidgets.QPushButton(self.centralwidget)
         self.wireButton.setGeometry(QtCore.QRect(30, 440, 131, 32))
 
+        # Button for calculating the synthetic images based on the current GCS parameters -|
+        self.calcButton = QtWidgets.QPushButton(self.centralwidget)
+        self.calcButton.setGeometry(QtCore.QRect(30, 560, 131, 32))
+
         # Sliders and drop menu for scaling parameters ----------------------------------|
         # Matches number of plot windows
         # Drop menu
@@ -142,6 +153,8 @@ class Ui_MainWindow(object):
         self.leSat1low.setGeometry(QtCore.QRect(220, ypos+wsize+30, 160, 22))
         self.labelSat1low = QtWidgets.QLabel(self.centralwidget)
         self.labelSat1low.setGeometry(QtCore.QRect(220, ypos+wsize+10, 160, 22))
+        self.labelSat1low_date = QtWidgets.QLabel(self.centralwidget)
+        self.labelSat1low_date .setGeometry(QtCore.QRect(220, ypos+wsize, 160, 22))
         # Sat1 maximum brightness
         self.slSat1hi = QtWidgets.QSlider(self.centralwidget)
         self.slSat1hi.setGeometry(QtCore.QRect(220, ypos+wsize+120, 160, 22))
@@ -159,6 +172,8 @@ class Ui_MainWindow(object):
             self.leSat2low.setGeometry(QtCore.QRect(220+wsize+10, ypos+wsize+30, 160, 22))
             self.labelSat2low = QtWidgets.QLabel(self.centralwidget)
             self.labelSat2low.setGeometry(QtCore.QRect(220+wsize+10, ypos+wsize+10, 160, 22))
+            self.labelSat2low_date = QtWidgets.QLabel(self.centralwidget)
+            self.labelSat2low_date .setGeometry(QtCore.QRect(220+wsize+10, ypos+wsize, 160, 22))
             # Sat2 maximum brightness
             self.slSat2hi = QtWidgets.QSlider(self.centralwidget)
             self.slSat2hi.setGeometry(QtCore.QRect(220+wsize+10, ypos+wsize+120, 160, 22))
@@ -176,6 +191,8 @@ class Ui_MainWindow(object):
             self.leSat3low.setGeometry(QtCore.QRect(220+2*wsize+20, ypos+wsize+30, 160, 22))
             self.labelSat3low = QtWidgets.QLabel(self.centralwidget)
             self.labelSat3low.setGeometry(QtCore.QRect(220+2*wsize+20, ypos+wsize+10, 160, 22))
+            self.labelSat3low_date = QtWidgets.QLabel(self.centralwidget)
+            self.labelSat3low_date .setGeometry(QtCore.QRect(220+2*wsize+20, ypos+wsize, 160, 22))
             # Sat3 maximum brightness
             self.slSat3hi = QtWidgets.QSlider(self.centralwidget)
             self.slSat3hi.setGeometry(QtCore.QRect(220+2*wsize+20, ypos+wsize+120, 160, 22))
@@ -200,26 +217,33 @@ class Ui_MainWindow(object):
         self.label_6.setText(_translate("MainWindow", "Ratio"))
         self.saveLabel.setText(_translate("MainWindow", "Right click to save"))
         self.wireButton.setText(_translate("MainWindow", "Wireframe On/Off"))
+        self.calcButton.setText(_translate("MainWindow", "Synth Images"))
         self.labelSat1.setText(_translate("MainWindow", "Sat 1"))
         self.labelSat1low.setText(_translate("MainWindow", "Min Brightness"))
         self.labelSat1hi.setText(_translate("MainWindow", "Max Brightness"))
+        self.labelSat1low_date.setText(_translate("MainWindow", "Date time"))
         if nSats > 1:
             self.labelSat2.setText(_translate("MainWindow", "Sat 2"))
             self.labelSat2low.setText(_translate("MainWindow", "Min Brightness"))
             self.labelSat2hi.setText(_translate("MainWindow", "Max Brightness"))
+            self.labelSat2low_date.setText(_translate("MainWindow", "Date time"))
         if nSats == 3:
             self.labelSat3.setText(_translate("MainWindow", "Sat 3"))
-            self.labelSat3low.setText(_translate("MainWindow", "Sat 3 Min Brightness"))
-            self.labelSat3hi.setText(_translate("MainWindow", "Sat 3 Max Brightness"))
+            self.labelSat3low.setText(_translate("MainWindow", "Min Brightness"))
+            self.labelSat3hi.setText(_translate("MainWindow", "Max Brightness"))
+            self.labelSat3low_date.setText(_translate("MainWindow", "Date time"))
 
 
 class mywindow(QtWidgets.QMainWindow):
     # This takes the generic but properly labeled window and adapts it to ---------------|
     # our specific needs
-    def __init__(self, imsIn, satposIn, plotrangesIn, sats, nsIn=[5, 20, 30]):
+    def __init__(self, imsIn, satposIn, plotrangesIn, sats, date_obs, save_name,nsIn=[5, 20, 30]):
         # Set up globals for the number of sats, plotranges, original images
         # the actual images displayed in the GUI, and the wireframe point density
-        global nSats, plotranges, imgOrig, imgOut, ns
+        global nSats, plotranges, imgOrig, imgOut, ns, date_obsglobal
+        global fname
+        fname = save_name
+        date_obsglobal = date_obs
         nSats = len(satposIn)
         plotranges = plotrangesIn
         imgOrig = []
@@ -250,10 +274,13 @@ class mywindow(QtWidgets.QMainWindow):
         for i in range(nSats):
             if i == 0:
                 self.ui.labelSat1.setText(sats[i][0]+' '+sats[i][1])
+                self.ui.labelSat1low_date.setText(date_obs[i])
             if i == 1:
                 self.ui.labelSat2.setText(sats[i][0]+' '+sats[i][1])
+                self.ui.labelSat2low_date.setText(date_obs[i])
             if i == 2:
                 self.ui.labelSat3.setText(sats[i][0]+' '+sats[i][1])
+                self.ui.labelSat3low_date.setText(date_obs[i])
 
         # -------------------------------------------------------------------------------|
         # Take the input sat info and assign to global ----------------------------------|
@@ -411,13 +438,13 @@ class mywindow(QtWidgets.QMainWindow):
         # Draw a white circle showing the outline of the Sun ----------------------------|
         thetas = np.linspace(0, 2*3.14159)
         self.ui.graphWidget1.plot(scaleNshift[0][0]*np.cos(thetas)+scaleNshift[0]
-                                  [1], scaleNshift[0][0]*np.sin(thetas)+scaleNshift[0][1])
+                                [1], scaleNshift[0][0]*np.sin(thetas)+scaleNshift[0][1])
         if nSats > 1:
             self.ui.graphWidget2.plot(scaleNshift[1][0]*np.cos(thetas)+scaleNshift[1]
-                                      [1], scaleNshift[1][0]*np.sin(thetas)+scaleNshift[1][1])
+                                    [1], scaleNshift[1][0]*np.sin(thetas)+scaleNshift[1][1])
         if nSats == 3:
             self.ui.graphWidget3.plot(scaleNshift[2][0]*np.cos(thetas)+scaleNshift[2]
-                                      [1], scaleNshift[2][0]*np.sin(thetas)+scaleNshift[2][1])
+                                    [1], scaleNshift[2][0]*np.sin(thetas)+scaleNshift[2][1])
 
         # -------------------------------------------------------------------------------|
         # Calculate the GCS shell using pyGCS and add to the figures --------------------|
@@ -442,6 +469,7 @@ class mywindow(QtWidgets.QMainWindow):
         f1 = open(fname, 'r')
         data = np.genfromtxt(f1, dtype=None, encoding='utf8')
         minmaxesOut = [[-9999, -9999], [-9999, -9999], [-9999, -9999]]
+        
         for line in data:
             if (line[0] == 'Lon:'):
                 self.ui.leLon.setText(str(line[1]))
@@ -496,7 +524,8 @@ class mywindow(QtWidgets.QMainWindow):
         # Executed when the window is closed. Saves the current
         # values of each parameter so can easily be reloaded
         global fname
-        print('Saving output in GCSvals.txt')
+        global date_obsglobal
+        print('Saving output in '+fname)
         f1 = open(fname, 'w')
         f1.write('Lon:     '+self.ui.leLon.text()+'\n')
         f1.write('Lat:     '+self.ui.leLat.text()+'\n')
@@ -508,12 +537,15 @@ class mywindow(QtWidgets.QMainWindow):
         f1.write('Scaling: '+scDict[self.ui.menuScale.currentText()]+'\n')
         f1.write('Sat1min: '+self.ui.leSat1low.text()+'\n')
         f1.write('Sat1max: '+self.ui.leSat1hi.text()+'\n')
+        #f1.write('Sat1_date: '+date_obsglobal[0]+'\n')
         if nSats > 1:
             f1.write('Sat2min: '+self.ui.leSat2low.text()+'\n')
             f1.write('Sat2max: '+self.ui.leSat2hi.text()+'\n')
+        #    f1.write('Sat2_date: '+date_obsglobal[1]+'\n')
         if nSats == 3:
             f1.write('Sat3min: '+self.ui.leSat3low.text()+'\n')
             f1.write('Sat3max: '+self.ui.leSat3hi.text()+'\n')
+        #    f1.write('Sat3_date: '+date_obsglobal[2]+'\n')
         f1.close()
 
     # -----------------------------------------------------------------------------------|
@@ -761,12 +793,13 @@ class mywindow(QtWidgets.QMainWindow):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
 
-# Simple code to set up and run the GUI -------------------------------------------------|
-def runGCSgui(ims, satpos, plotranges, sats, ns):
+# Simple code to set up and run the GUI -----------------------------------------------
+# --|
+def runGCSgui(ims, satpos, plotranges, sats, date_obs, save_name,ns):
     # Make an application
     app = QtWidgets.QApplication([])
     # Make a widget
-    application = mywindow(ims, satpos, plotranges, sats, nsIn=ns)
+    application = mywindow(ims, satpos, plotranges, sats, date_obs, save_name ,nsIn=ns)
     # Run it
     application.show()
     # Exit nicely
