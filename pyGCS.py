@@ -67,7 +67,7 @@ def cmecloud(ang, hin, nleg, ncirc, k, ncross, hIsLeadingEdge=True):
 
     # Calc the cross section vect in xyz
     radVec = crMEGA*(np.array([np.sin(thetaMEGA)*np.sin(betaMEGA), np.sin(thetaMEGA) *
-                     np.cos(betaMEGA), np.cos(thetaMEGA)]))     # Add to the axis to get the full shell
+                    np.cos(betaMEGA), np.cos(thetaMEGA)]))     # Add to the axis to get the full shell
     shell = np.transpose(radVec).reshape([ncross*nbp, 3])+axisMEGA
 
     return np.array(shell)
@@ -137,12 +137,20 @@ def getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=5, ncirc=20, nc
 
     clouds = []
     # dSat = 213. # was assuming L1 for sat projections which no longer use
-    for sat in satpos:
+
+    #for sat in satpos:
+    #Modified 28/02/2024 by D.Lloveras to obtain a better match with IDL in Lasco C2 (satpos[1])
+    #Find a better way to do this!
+    for i, sat in enumerate(satpos):
         # rot funcs like things transposed
         cXYZ = np.transpose(cloud)
 
+        #breakpoint()
         # Rot to correct tilt and Lat, matches IDL better not including satlat
-        cXYZ = roty(rotx(cXYZ, CMEtilt), -(CMElat))
+        if i == 2: 
+            cXYZ = roty(rotx(cXYZ, CMEtilt), -(CMElat-sat[1]))
+        if i != 2:
+            cXYZ = roty(rotx(cXYZ, CMEtilt), -CMElat)
         # Project in Lat (not done in IDL)
         # satXYZ = SPH2CART([dSat,sat[1],sat[0]])
         # gamma = np.arctan((cXYZ[2]-satXYZ[2])/(np.sqrt(satXYZ[0]**2+satXYZ[1]**2)-np.sqrt(cXYZ[0]**2+cXYZ[1]**2)))
@@ -171,7 +179,6 @@ def getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=5, ncirc=20, nc
 def processHeaders(headers):
     satpos = []
     plotranges = []
-
     for i in range(len(headers)):
         # Stonyhurst coords for the sats
         thisHead = headers[i]
