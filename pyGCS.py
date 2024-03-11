@@ -130,7 +130,7 @@ def shellSkeleton(alpha, h, nleg, ncirc, k):
     return axisPTS, crossrads, betas
 
 
-def getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=5, ncirc=20, ncross=30):
+def getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, do_rotate_lat, nleg=5, ncirc=20, ncross=30):
     cloud = cmecloud(ang*dtor, height, nleg, ncirc, k, ncross)
     # in order (of parens) rotx to tilt, roty by -lat, rotz by lon
     # cloud = np.transpose(rotz(roty(rotx(np.transpose(cloud), CMEtilt),-CMElat),CMElon))
@@ -140,14 +140,15 @@ def getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=5, ncirc=20, nc
 
     #for sat in satpos:
     #Modified 28/02/2024 by D.Lloveras to obtain a better match with IDL in Lasco C2 (satpos[1])
-    #Find a better way to do this!
+    #do_rotate_lat list of boolean values to rotate or not the cloud in latitude. Should be True in case of Lasco-C2, False in any other case.
     for i, sat in enumerate(satpos):
         # rot funcs like things transposed
         cXYZ = np.transpose(cloud)
         # Rot to correct tilt and Lat, matches IDL better not including satlat
-        if i == 2: 
+        if do_rotate_lat[i] == True:
+            #Lasco-C2 correction in HGLAT
             cXYZ = roty(rotx(cXYZ, CMEtilt), -(CMElat-sat[1]))
-        if i != 2:
+        if do_rotate_lat[i] == False:
             cXYZ = roty(rotx(cXYZ, CMEtilt), -CMElat)
         # Project in Lat (not done in IDL)
         # satXYZ = SPH2CART([dSat,sat[1],sat[0]])

@@ -20,6 +20,7 @@ TODO:
 global nSats
 global CMElat, CMElon, CMEtilt, height, k, ang, satpos
 global fname
+global do_rotate_lat
 
 # This will output the values to this filename so it can reload
 # after it has been closed.  Delete this file to open with defaults
@@ -237,11 +238,14 @@ class Ui_MainWindow(object):
 class mywindow(QtWidgets.QMainWindow):
     # This takes the generic but properly labeled window and adapts it to ---------------|
     # our specific needs
-    def __init__(self, imsIn, satposIn, plotrangesIn, sats, date_obs, save_name,nsIn=[5, 20, 30]):
+    def __init__(self, imsIn, satposIn, plotrangesIn, sats, date_obs, save_name, do_rotate_la, nsIn=[5, 20, 30]):
         # Set up globals for the number of sats, plotranges, original images
         # the actual images displayed in the GUI, and the wireframe point density
         global nSats, plotranges, imgOrig, imgOut, ns, date_obsglobal
         global fname
+        global do_rotate_lat
+        
+        do_rotate_lat = do_rotate_la
         fname = save_name
         date_obsglobal = date_obs
         nSats = len(satposIn)
@@ -448,7 +452,7 @@ class mywindow(QtWidgets.QMainWindow):
 
         # -------------------------------------------------------------------------------|
         # Calculate the GCS shell using pyGCS and add to the figures --------------------|
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos,do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
@@ -635,7 +639,7 @@ class mywindow(QtWidgets.QMainWindow):
                 scatters[i].setData()
             wireShow = False
         else:
-            data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+            data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
             for i in range(nSats):
                 self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
             wireShow = True
@@ -702,7 +706,7 @@ class mywindow(QtWidgets.QMainWindow):
         global CMElon
         CMElon = value
         self.ui.leLon.setText(str(CMElon))
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
@@ -710,7 +714,7 @@ class mywindow(QtWidgets.QMainWindow):
         global CMElat
         CMElat = value
         self.ui.leLat.setText(str(CMElat))
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos,do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
@@ -718,7 +722,7 @@ class mywindow(QtWidgets.QMainWindow):
         global CMEtilt
         CMEtilt = value
         self.ui.leTilt.setText(str(CMEtilt))
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos,do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
@@ -728,7 +732,7 @@ class mywindow(QtWidgets.QMainWindow):
         # have better resolution
         height = 0.1*value
         self.ui.leHeight.setText('{:6.2f}'.format(height))
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos,do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2] )
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
@@ -736,7 +740,7 @@ class mywindow(QtWidgets.QMainWindow):
         global ang
         ang = value
         self.ui.leAW.setText(str(ang))
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos,do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2] )
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
@@ -746,7 +750,7 @@ class mywindow(QtWidgets.QMainWindow):
         # have better resolution
         k = 0.01*value
         self.ui.leK.setText('{:3.2f}'.format(k))
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos,do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
@@ -788,18 +792,18 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.sliderAW.setValue(int(ang))
         self.ui.sliderK.setValue(int(k*100))
         # Make new wirerframes and plot
-        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=ns[0], ncirc=ns[1], ncross=ns[2])
+        data = getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos,do_rotate_lat, nleg=ns[0], ncirc=ns[1], ncross=ns[2] )
         for i in range(nSats):
             self.plotGCSscatter(scatters[i], data[i], scaleNshift[i], innerR[i])
 
 
 # Simple code to set up and run the GUI -----------------------------------------------
 # --|
-def runGCSgui(ims, satpos, plotranges, sats, date_obs, save_name,ns):
+def runGCSgui(ims, satpos, plotranges, sats, date_obs, save_name, do_rotate_lat, ns):
     # Make an application
     app = QtWidgets.QApplication([])
     # Make a widget
-    application = mywindow(ims, satpos, plotranges, sats, date_obs, save_name ,nsIn=ns)
+    application = mywindow(ims, satpos, plotranges, sats, date_obs, save_name, do_rotate_lat ,nsIn=ns)
     # Run it
     application.show()
     # Exit nicely

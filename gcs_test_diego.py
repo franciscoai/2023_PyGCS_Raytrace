@@ -16,7 +16,8 @@ from wrapper_eeggl import *
 if __name__ == "__main__":
     frame = 8
     instrument = "cor2a"
-    fecha = "2011-05-15"
+    dir = "/data_local/GCS/2023_PyGCS_Raytrace/output/2011-02-15/"
+    fecha = "2011-02-15"
     save_name = fecha+instrument+"_time_"+str(frame)+".txt"
     base_images, cme_images = wrapper_20110215(frame)
 
@@ -48,13 +49,20 @@ if __name__ == "__main__":
     headers = [hdra1,hdrb1, hdrL1]
     ims = [np.transpose(ima1 - ima0), np.transpose(imb1 - imb0), np.transpose((imL1 - imL0))]
     
+    #Lasco-C2 needs to be rotated in heliographic latitude
+    do_rotate_lat=[]
+    for instr in range(len(headers)):
+        if headers[instr]['TELESCOP'] == 'SOHO': 
+            do_rotate_lat.append(True) 
+        else:
+            do_rotate_lat.append(False)
+
     satpos, plotranges = pyGCS.processHeaders(headers)
-    #breakpoint()
     sats = [["STEREO-A", "COR2"], ["STEREO-B", "COR2"], ["LASCO", "C2"]]
     date_obs = [hdra1['DATE-OBS'], hdrb1['DATE-OBS'], hdrL1['DATE-OBS']]
     filenames = [hdra1['filename'], hdrb1['filename'], hdrL1['filename']]
     #breakpoint()
-    runGCSgui(ims, satpos, plotranges, sats,date_obs, save_name, [5, 20, 30])
+    runGCSgui(ims, satpos, plotranges, sats,date_obs, save_name,do_rotate_lat, [5, 20, 30])
 
     # This is a test for running several events at once
     # start_time = parse_time("2011-06-05 07:00:00")

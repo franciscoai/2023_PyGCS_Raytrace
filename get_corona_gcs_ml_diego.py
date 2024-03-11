@@ -41,22 +41,6 @@ def get_corona(sat, imsize=None, diff=True, rnd_rot=False):
     size_occ_ext=[16, 16, 6.]# Occulters size for [sat1, sat2 ,sat3] in [Rsun]
 
 
-    # main
-    # # STEREO A C2
-    # if sat==0:
-    #     p0 = '/gehme/data/stereo/secchi/L1/a/img/cor2/20130424/20130424_055400_14c2A.fts' 
-    #     p1 = '/gehme/data/stereo/secchi/L1/a/img/cor2/20130424/20130424_062400_14c2A.fts' 
-    #     p0img,h0 = sunpy.io._fits.read(p0)[0]
-    #     p1img, _ = sunpy.io._fits.read(p1)[0]
-    #     oimg = p1img - p0img
-    # # STEREO B C2
-    # elif sat==1:
-    #     p0 = '/gehme/data/stereo/secchi/L1/b/img/cor2/20130424/20130424_065400_14c2B.fts' 
-    #     p1 = '/gehme/data/stereo/secchi/L1/b/img/cor2/20130424/20130424_072400_14c2B.fts'
-    #     p0img,h0 = sunpy.io._fits.read(p0)[0]
-    #     p1img, _ = sunpy.io._fits.read(p1)[0]
-    #     oimg = p1img - p0img
-    # STEREO A C1
     if sat==0:
         path=cor2_path+"/cor2_a"
     # STEREO B
@@ -100,8 +84,7 @@ def get_corona(sat, imsize=None, diff=True, rnd_rot=False):
         h0['CRPIX1'] = int(h0['CRPIX1']/sz_ratio[1]) 
         size_occ[sat] = size_occ[sat]*np.mean(sz_ratio)
 
-       
-    return oimg, h0, size_occ[sat]
+ 
 
 
 
