@@ -144,8 +144,6 @@ def getGCS(CMElon, CMElat, CMEtilt, height, k, ang, satpos, nleg=5, ncirc=20, nc
     for i, sat in enumerate(satpos):
         # rot funcs like things transposed
         cXYZ = np.transpose(cloud)
-
-        #breakpoint()
         # Rot to correct tilt and Lat, matches IDL better not including satlat
         if i == 2: 
             cXYZ = roty(rotx(cXYZ, CMEtilt), -(CMElat-sat[1]))
@@ -208,7 +206,7 @@ def processHeaders(headers):
         # plotranges.append([-xaxrange, xaxrange, -yaxrange, yaxrange])
         xaxrange = [float(thisHead['CRPIX1'])*float(thisHead['CDELT1'])/rSun, (float(thisHead['NAXIS1'])-float(thisHead['CRPIX1']))*float(thisHead['CDELT1'])/rSun]
         yaxrange = [float(thisHead['CRPIX2'])*float(thisHead['CDELT2'])/rSun, (float(thisHead['NAXIS2'])-float(thisHead['CRPIX2']))*float(thisHead['CDELT2'])/rSun]
-        plotranges.append([-xaxrange[0], xaxrange[1], -yaxrange[0], yaxrange[1]])        
+        plotranges.append([-xaxrange[0], xaxrange[1], -yaxrange[0], yaxrange[1]])            
     return satpos, plotranges
 
 

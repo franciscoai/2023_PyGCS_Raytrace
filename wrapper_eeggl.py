@@ -1,5 +1,5 @@
 #wrapper of event from 20110215
-
+#Contiene los trios de imagenes para el tiempo mas cercano de cor2A/B y C2 
 #
 
 def wrapper_20110215(frame):

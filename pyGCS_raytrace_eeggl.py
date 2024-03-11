@@ -77,9 +77,9 @@ for sat in range(n_sat):
 #    size_occ_ext.append(d)
 
 
-frame = 7
+frame =9
 instrument = "cor2a"
-fecha = "2011-05-15"
+fecha = "2011-02-15"
 save_name = fecha+instrument+"_time_"+str(frame)+".txt"
 base_images, cme_images = wrapper_20110215(frame)
 
@@ -102,9 +102,9 @@ print(f'Saving images for GCS')
 # level_cme: CME intensity level relative to the mean background corona
 par_names = ['CMElon', 'CMElat', 'CMEtilt', 'height', 'k','ang'] # par names
 par_units = ['deg', 'deg', 'deg', 'Rsun','','deg'] # par units
-gcs_par = [45,10,50,10,0.35, 30] # min-max ranges of each parameter in par_names
+#gcs_par = [45,10,50,10,0.35, 30] # min-max ranges of each parameter in par_names
 gcs_par = read_GCS_variables_txt(save_name)
-
+#breakpoint()
 n_sat = len(base_images)
 #breakpoint()
 for sat in range(n_sat):
@@ -157,13 +157,13 @@ for sat in range(n_sat):
         fig=save_png(btot,ofile=ofile, range=[vmin, vmax])
 
 ###check this.
-                clouds = pyGCS.getGCS(df['CMElon'][row], df['CMElat'][row], df['CMEtilt'][row], df['height'][row], df['k'][row], df['ang'][row], satpos)                
-            x = clouds[sat, :, 1]
-            y = clouds[0, :, 2]         
-            arr_cloud=pnt2arr(x,y,plotranges,imsize, sat)
-            ofile = folder +'/{:08.3f}_{:08.3f}_{:08.3f}_{:08.3f}_{:08.3f}_{:08.3f}_sat{}_mesh.png'.format(
-                df['CMElon'][row], df['CMElat'][row], df['CMEtilt'][row], df['height'][row], df['k'][row], df['ang'][row], sat+1)
-            fig=save_png(arr_cloud,ofile=ofile, range=[0, 1])  
+#                clouds = pyGCS.getGCS(df['CMElon'][row], df['CMElat'][row], df['CMEtilt'][row], df['height'][row], df['k'][row], df['ang'][row], satpos)                
+#            x = clouds[sat, :, 1]
+#            y = clouds[0, :, 2]         
+#            arr_cloud=pnt2arr(x,y,plotranges,imsize, sat)
+#            ofile = folder +'/{:08.3f}_{:08.3f}_{:08.3f}_{:08.3f}_{:08.3f}_{:08.3f}_sat{}_mesh.png'.format(
+#                df['CMElon'][row], df['CMElat'][row], df['CMEtilt'][row], df['height'][row], df['k'][row], df['ang'][row], sat+1)
+#            fig=save_png(arr_cloud,ofile=ofile, range=[0, 1])  
 
 
 
