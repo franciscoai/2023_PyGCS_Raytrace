@@ -77,7 +77,7 @@ for sat in range(n_sat):
 #    size_occ_ext.append(d)
 
 
-frame =9
+frame =8
 instrument = "cor2a"
 fecha = "2011-02-15"
 save_name = fecha+instrument+"_time_"+str(frame)+".txt"
@@ -87,9 +87,7 @@ for img in cme_images:
     oimg = fits.open(img)[0].data
     h0   = fits.getheader(img)
     headers.append(h0)
-#Cor2A, Cor2B, C2
-#fnameA0, fnameB0, fnameL0 = base_images  
-#fnameA1, fnameB1, fnameL1 = cme_images 
+
 size_occ     = [2.9, 4.0, 2.]
 size_occ_ext = [16, 16, 6.]
 
@@ -112,6 +110,7 @@ for sat in range(n_sat):
     x = np.linspace(plotranges[sat][0], plotranges[sat][1], num=imsize[0])
     y = np.linspace(plotranges[sat][2], plotranges[sat][3], num=imsize[1])
     xx, yy = np.meshgrid(x, y)
+    #lo de abajo es independiente de haber modificado headers segun imsize
     x_cS, y_cS = center_rSun_pixel(headers, plotranges, sat)  
     r = np.sqrt((xx - x_cS)**2 + (yy - y_cS)**2)
     
@@ -140,10 +139,22 @@ for sat in range(n_sat):
         btot[r >= size_occ_ext[sat]] = level_occ*level_back + noise_ext
     #cme = fits.PrimaryHDU(btot)
     #cme.writeto(OPATH +'/sat{}_btot.fits'.format(sat+1), overwrite=True)
-    
-    
+    #arreglando headers si imsize difiere de la dimension de la imagen original
+    headers2=[]
+    for hdr in headers:
+        hdr2=hdr.copy()
+        naxis_original1 = hdr["naxis1"]
+        naxis_original2 = hdr["naxis2"]
+        hdr2["naxis1"]=imsize[0]
+        hdr2["naxis2"]=imsize[1]
+        hdr2["crpix1"]=hdr["crpix1"]/(naxis_original1/imsize[0])
+        hdr2["crpix2"]=hdr["crpix2"]/(naxis_original2/imsize[1])
+        hdr2["CDELT1"]=hdr["CDELT1"]*(naxis_original1/imsize[0])
+        hdr2["CDELT2"]=hdr["CDELT2"]*(naxis_original2/imsize[1])
+        headers2.append(hdr2)
+
     if otype=="fits":
-        cme = fits.PrimaryHDU(data=btot,header=headers[sat])
+        cme = fits.PrimaryHDU(data=btot,header=headers2[sat])
         cme.writeto(OPATH +'/{:05.2f}_{:05.2f}_{:05.1f}_{:05.2f}_{:05.2f}_{:05.2f}_sat{}_date{}_frame{}_btot.fits'.format(
             gcs_par[0], gcs_par[1], gcs_par[2], gcs_par[3], gcs_par[4], gcs_par[5], sat+1,fecha,frame), overwrite=True)
     elif otype =="png":
