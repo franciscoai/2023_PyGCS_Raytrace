@@ -15,7 +15,7 @@ from wrapper_eeggl import *
 
 if __name__ == "__main__":
     frame = 8
-    instrument = "cor2a"
+    instrument = ""
     dir = "/data_local/GCS/2023_PyGCS_Raytrace/output/2011-02-15/"
     fecha = "2011-02-15"
     save_name = fecha+instrument+"_time_"+str(frame)+".txt"

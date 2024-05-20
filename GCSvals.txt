@@ -1,0 +1,13 @@
+Lon:     34.0
+Lat:     2.0
+Tilt:    -90.0
+Height:  5.3
+HalfAng: 42.0
+Ratio:   0.9
+Scaling: 1
+Sat1min: 34
+Sat1max: 42
+Sat2min: 34
+Sat2max: 42
+Sat3min: 34
+Sat3max: 42

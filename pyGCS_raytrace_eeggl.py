@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# ## Librerias
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -21,6 +17,13 @@ from coord_transformation import deg2px, center_rSun_pixel, pnt2arr
 import scipy
 from wrapper_eeggl import *
 from read_GCS_variables_txt import read_GCS_variables_txt
+
+"""
+Este codigo toma  los parametros de un evento de GCS y genera imagenes sinteticas de la corona solar. 
+Los parametros del GCS se obtuvieron y guardaron con pyGCSgui en un archivo txt yque se lee con read_GCS_variables_txt. 
+El mismo se corrio utilizando el wrapper_eeggl.py que aqui se importa. 
+El wrapper_eeggl.py contiene los trios de imagenes para el tiempo mas cercano de cor2A/B y C2
+"""
 
 def save_png(array, ofile=None, range=None):
     '''
@@ -49,45 +52,42 @@ def save_png(array, ofile=None, range=None):
 # CONSTANTS
 #Dir where the output images are saved
 OPATH = os.path.dirname(os.path.realpath(__file__)) + '/output'
-#n_sat = 3 #number of satellites to  use [Cor2 A, Cor2 B, Lasco C2]
+n_sat = 3 #number of satellites to  use [Cor2 A, Cor2 B, Lasco C2]
 
 # Syntethic image options
 imsize=np.array([512, 512], dtype='int32') # output image size
-otype="png" # set the ouput file type: 'png' or 'fits'
+# set the ouput file type: 'png' or 'fits'
+#otype="png" 
 otype="fits" 
 im_range=2. # range of the color scale of the output final syntethyc png image in std dev around the mean
 add_occ_to_btot = True # if True the occulter is added to the final btot image
 level_occ=0. #mean level of the occulter relative to the background level
 add_back_to_btot = False # if True the background corona is added to the final btot image
 #breakpoint()
-os.makedirs(OPATH, exist_ok=True)
 
 back_corona=[]
 headers=[]
-#size_occ=[]
-#size_occ_ext=[]
-#satpos_all=[]
-#plotranges_all=[]
-n_sat = 3
+
 for sat in range(n_sat):
     a,b,c,d=get_corona(sat,imsize=imsize)
     back_corona.append(a)
-#    headers.append(b)
-#    size_occ.append(c)
-#    size_occ_ext.append(d)
 
-
-frame =8
-instrument = "cor2a"
+#Defino el trio de imagenes que me interesa
+frame = 9
+instrument = ""
 fecha = "2011-02-15"
-save_name = fecha+instrument+"_time_"+str(frame)+".txt"
-base_images, cme_images = wrapper_20110215(frame)
+save_name = fecha+'/'+fecha+instrument+"_time_"+str(frame)+".txt"
+base_images, cme_images = wrapper_20110215(frame) #cada evento tiene su wrapper
+
+OPATH = OPATH +'/'+ fecha
+os.makedirs(OPATH, exist_ok=True)
 
 for img in cme_images:
     oimg = fits.open(img)[0].data
     h0   = fits.getheader(img)
     headers.append(h0)
 
+#occulter size in Rsun
 size_occ     = [2.9, 4.0, 2.]
 size_occ_ext = [16, 16, 6.]
 
@@ -100,11 +100,11 @@ print(f'Saving images for GCS')
 # level_cme: CME intensity level relative to the mean background corona
 par_names = ['CMElon', 'CMElat', 'CMEtilt', 'height', 'k','ang'] # par names
 par_units = ['deg', 'deg', 'deg', 'Rsun','','deg'] # par units
-#gcs_par = [45,10,50,10,0.35, 30] # min-max ranges of each parameter in par_names
+
 gcs_par = read_GCS_variables_txt(save_name)
-#breakpoint()
 n_sat = len(base_images)
-#breakpoint()
+headers2=[]
+
 for sat in range(n_sat):
     #defining ranges and radius of the occulter
     x = np.linspace(plotranges[sat][0], plotranges[sat][1], num=imsize[0])
@@ -113,7 +113,7 @@ for sat in range(n_sat):
     #lo de abajo es independiente de haber modificado headers segun imsize
     x_cS, y_cS = center_rSun_pixel(headers, plotranges, sat)  
     r = np.sqrt((xx - x_cS)**2 + (yy - y_cS)**2)
-    
+    #breakpoint()
     #Total intensity (Btot) figure from raytrace:               
     btot = rtraytracewcs(headers[sat], gcs_par[0], gcs_par[1], gcs_par[2], gcs_par[3], gcs_par[4], gcs_par[5],
                         imsize=imsize, occrad=size_occ[sat], in_sig=0.5, out_sig=0.25, nel=1e5)
@@ -140,23 +140,25 @@ for sat in range(n_sat):
     #cme = fits.PrimaryHDU(btot)
     #cme.writeto(OPATH +'/sat{}_btot.fits'.format(sat+1), overwrite=True)
     #arreglando headers si imsize difiere de la dimension de la imagen original
-    headers2=[]
-    for hdr in headers:
-        hdr2=hdr.copy()
-        naxis_original1 = hdr["naxis1"]
-        naxis_original2 = hdr["naxis2"]
-        hdr2["naxis1"]=imsize[0]
-        hdr2["naxis2"]=imsize[1]
-        hdr2["crpix1"]=hdr["crpix1"]/(naxis_original1/imsize[0])
-        hdr2["crpix2"]=hdr["crpix2"]/(naxis_original2/imsize[1])
-        hdr2["CDELT1"]=hdr["CDELT1"]*(naxis_original1/imsize[0])
-        hdr2["CDELT2"]=hdr["CDELT2"]*(naxis_original2/imsize[1])
-        headers2.append(hdr2)
+    #for hdr in headers:
+    hdr2=headers[sat].copy()
+    naxis_original1 = hdr2["naxis1"]
+    naxis_original2 = hdr2["naxis2"]
+    hdr2["naxis1"]=imsize[0]
+    hdr2["naxis2"]=imsize[1]
+    hdr2["crpix1"]=hdr2["crpix1"]/(naxis_original1/imsize[0])
+    hdr2["crpix2"]=hdr2["crpix2"]/(naxis_original2/imsize[1])
+    hdr2["CDELT1"]=hdr2["CDELT1"]*(naxis_original1/imsize[0])
+    hdr2["CDELT2"]=hdr2["CDELT2"]*(naxis_original2/imsize[1])
+    headers2.append(hdr2)
 
+    #breakpoint()
     if otype=="fits":
         cme = fits.PrimaryHDU(data=btot,header=headers2[sat])
         cme.writeto(OPATH +'/{:05.2f}_{:05.2f}_{:05.1f}_{:05.2f}_{:05.2f}_{:05.2f}_sat{}_date{}_frame{}_btot.fits'.format(
             gcs_par[0], gcs_par[1], gcs_par[2], gcs_par[3], gcs_par[4], gcs_par[5], sat+1,fecha,frame), overwrite=True)
+        print("Imagen guardada:" + OPATH +'/{:05.2f}_{:05.2f}_{:05.1f}_{:05.2f}_{:05.2f}_{:05.2f}_sat{}_date{}_frame{}_btot.fits'.format(
+            gcs_par[0], gcs_par[1], gcs_par[2], gcs_par[3], gcs_par[4], gcs_par[5], sat+1,fecha,frame))
     elif otype =="png":
     #full image
         m = np.mean(btot)

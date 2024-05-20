@@ -1,6 +1,7 @@
 
 def read_GCS_variables_txt(filename):
-    with open(filename, 'r') as file:
+    dir='/data_local/GCS/2023_PyGCS_Raytrace/output/'
+    with open(dir+filename, 'r') as file:
         # Read all lines
         lines = file.readlines()
 
